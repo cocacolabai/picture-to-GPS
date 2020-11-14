@@ -162,6 +162,5 @@ class GPXExtractor():
             cv2.waitKey(0)
 
 if __name__ == "__main__":
-    image = cv2.imread("example/visugpx.png")
-    gpx_extractor = GPXExtractor(image)
+    gpx_extractor = GPXExtractor("example/visugpx.png")
     gpx_extractor.convert()

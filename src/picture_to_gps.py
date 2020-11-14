@@ -4,13 +4,16 @@ from gpx_converter import Converter
 
 DEBUG=True
 
-# -------> x (longitude)
-# |
-# |
-# |
-# v y (latitude)
-#
 class GPXExtractor():
+    """
+     Extract GPS points from a route map picture with python/OpenCV
+
+     -------> x (longitude)
+     |
+     |
+     |
+     v y (latitude)
+    """
     def __init__(self, path):
         self.img = cv2.imread(path)
         self.x_dim = self.img.shape[1]
@@ -18,6 +21,9 @@ class GPXExtractor():
         self.init_coord_system()
 
     def init_coord_system(self):
+        """
+        Initialize coordinates system
+        """
         self.top_left_coord = (47.16878, -1.535)
         self.bottom_righ_coord = (47.0471, -1.2264 )
 
@@ -28,26 +34,31 @@ class GPXExtractor():
         self.step_y = total_lat/self.y_dim
 
     def pixel_to_gps_coord(self, local_coord):
+        """
+        Convert a pixel position (x,y) to gps coordinates (lon,lat)
+        """
         print(local_coord)
         lat = self.top_left_coord[0] + self.step_y*local_coord[1]
         lon = self.top_left_coord[1] + self.step_x*local_coord[0]
         return (lat,lon)
 
     def pixels_to_gps_coord(self, local_coord_list):
+        """
+        Convert a list of pixel positions (x,y) to a list of gps coordinates (lon,lat)
+        """
         gps_coords = []
         for local_coord in local_coord_list:
             gps_coords.append(self.pixel_to_gps_coord(local_coord))
         return gps_coords
 
-    # applies a threshold to an image based on two boundaries
-    # @param {image} the image to threshold
-    # @param {Array[int, int, int]} lower threshold in BGR
-    # @param {Array[int, int, int]} upper threshold in BGR
     def compute_trace_mask(self):
-        # TODO: parameter for visugps.png
-        BGR = np.array([241,70,74])
-        upper = BGR + 50
-        lower = BGR - 50
+        """
+        Applies a threshold to an image based on a color
+        """
+        # WIP: parameter for visugps.png
+        bgr_color = np.array([241,70,74])
+        upper = bgr_color + 50
+        lower = bgr_color - 50
 
         trace_mask = cv2.inRange(self.img, lower, upper)
 
@@ -55,9 +66,12 @@ class GPXExtractor():
         trace_mask = cv2.erode(trace_mask, element, iterations = 1)
         return trace_mask
 
-    # Compute pixel points from mask
-    # TODO: remove cmp
     def compute_trace_points(self, mask):
+        """
+        Return a list of points every 5 pixels (if possible) based on the given mask
+        """
+        # WIP: remove cmp
+
         #points_mask = np.zeros(mask.shape[::-1],np.uint8)
         points_list = []
 
@@ -93,8 +107,12 @@ class GPXExtractor():
 
         return points_list
 
-    # TODO: clean this function
+
     def get_next_point(self, mask, cur_point, points_list):
+        """
+        Search the next pixel on the mask in a radius of 5 pixels 
+        """
+
         # Center coordinates
         center_coordinates = (cur_point[0], cur_point[1])
 
@@ -143,6 +161,9 @@ class GPXExtractor():
         return None
 
     def convert(self):
+        """
+        Extract GPS points from a route map picture with python/OpenCV and save it in a gpx file 
+        """
         trace_mask = self.compute_trace_mask()
         pixel_points = self.compute_trace_points(trace_mask)
         if DEBUG:

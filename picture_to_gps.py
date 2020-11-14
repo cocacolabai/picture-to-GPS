@@ -11,8 +11,8 @@ DEBUG=True
 # v y (latitude)
 #
 class GPXExtractor():
-    def __init__(self, img):
-        self.img = img
+    def __init__(self, path):
+        self.img = cv2.imread(path)
         self.x_dim = self.img.shape[1]
         self.y_dim = self.img.shape[0]
         self.init_coord_system()
